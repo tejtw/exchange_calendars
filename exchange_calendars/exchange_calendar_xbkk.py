@@ -15,7 +15,8 @@
 
 from datetime import time
 from itertools import chain
-from zoneinfo import ZoneInfo
+
+from pytz import timezone
 
 from .exchange_calendar import HolidayCalendar, ExchangeCalendar
 from .xbkk_holidays import (
@@ -79,7 +80,7 @@ class XBKKExchangeCalendar(ExchangeCalendar):
 
     name = "XBKK"
 
-    tz = ZoneInfo("Asia/Bangkok")
+    tz = timezone("Asia/Bangkok")
 
     open_times = ((None, time(10)),)
 

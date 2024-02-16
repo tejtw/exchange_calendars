@@ -1,6 +1,5 @@
 from datetime import time
 from itertools import chain
-from zoneinfo import ZoneInfo
 
 import pandas as pd
 from pandas.tseries.holiday import (
@@ -10,6 +9,7 @@ from pandas.tseries.holiday import (
     Holiday,
     weekend_to_monday,
 )
+from pytz import timezone
 
 from .common_holidays import (
     boxing_day,
@@ -127,7 +127,7 @@ class XTSEExchangeCalendar(ExchangeCalendar):
 
     name = "XTSE"
 
-    tz = ZoneInfo("America/Toronto")
+    tz = timezone("America/Toronto")
 
     open_times = ((None, time(9, 30)),)
 

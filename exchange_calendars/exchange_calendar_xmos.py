@@ -13,62 +13,49 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-from __future__ import annotations
-
-import datetime
+from datetime import time
 from itertools import chain
-from zoneinfo import ZoneInfo
 
+import pandas as pd
 from pandas.tseries.holiday import Holiday, weekend_to_monday
+from pytz import timezone
 
 from .common_holidays import european_labour_day, new_years_day, new_years_eve
 from .exchange_calendar import WEEKDAYS, HolidayCalendar, ExchangeCalendar
 
 
-def new_years_eve_observance(dt: datetime.datetime) -> datetime.datetime | None:
+def new_years_eve_observance(holidays):
     # For some reason New Year's Eve was not a holiday these years.
-    return None if dt.year in [2008, 2009] else weekend_to_monday(dt)
+    holidays = holidays[(holidays.year != 2008) & (holidays.year != 2009)]
+
+    return pd.to_datetime([weekend_to_monday(day) for day in holidays])
 
 
-def new_years_day_observance(dt: datetime.datetime) -> datetime.datetime | None:
-    # New Year's Day did not follow the next-non-holiday rule these years.
-    return None if dt.year in [2022] else weekend_to_monday(dt)
+def new_years_holiday_observance(holidays):
+    # New Year's Holiday did not follow the next-non-holiday rule in 2016.
+    holidays = holidays[(holidays.year != 2016)]
+
+    return pd.to_datetime([weekend_to_monday(day) for day in holidays])
 
 
-def new_years_holiday_observance(dt: datetime.datetime) -> datetime.datetime | None:
-    # New Year's Holiday did not follow the next-non-holiday rule these years.
-    return None if dt.year in [2016, 2021, 2022] else weekend_to_monday(dt)
-
-
-def orthodox_christmas_observance(dt: datetime.datetime) -> datetime.datetime | None:
+def orthodox_christmas_observance(holidays):
     # Orthodox Christmas did not follow the next-non-holiday rule these years.
-    return None if dt.year in [2012, 2017, 2023, 2024] else weekend_to_monday(dt)
+    holidays = holidays[(holidays.year != 2012) & (holidays.year != 2017)]
+
+    return pd.to_datetime([weekend_to_monday(day) for day in holidays])
 
 
-def defender_of_fatherland_observance(
-    dt: datetime.datetime,
-) -> datetime.datetime | None:
+def defender_of_fatherland_observance(holidays):
     # Defender of the Fatherland Day did not follow the next-non-holiday rule
     # these years.
-    return None if dt.year in [2013, 2014, 2019] else weekend_to_monday(dt)
+    holidays = holidays[
+        (holidays.year != 2013) & (holidays.year != 2014) & (holidays.year != 2019)
+    ]
+
+    return pd.to_datetime([weekend_to_monday(day) for day in holidays])
 
 
-def victory_day_observance(dt: datetime.datetime) -> datetime.datetime | None:
-    # Victory Day did not follow the next-non-holiday rule these years.
-    return None if dt.year in [2021] else weekend_to_monday(dt)
-
-
-def day_of_russia_observance(dt: datetime.datetime) -> datetime.datetime | None:
-    # Day of Russia did not follow the next-non-holiday rule these years.
-    return None if dt.year in [2021] else weekend_to_monday(dt)
-
-
-def unity_day_observance(dt: datetime.datetime) -> datetime.datetime | None:
-    # Unity Day did not follow the next-non-holiday rule these years.
-    return None if dt.year in [2023] else weekend_to_monday(dt)
-
-
-NewYearsDay = new_years_day(observance=new_years_day_observance)
+NewYearsDay = new_years_day(observance=weekend_to_monday)
 NewYearsHoliday = Holiday(
     "New Year's Holiday",
     month=1,
@@ -131,21 +118,21 @@ VictoryDay = Holiday(
     "Victory Day",
     month=5,
     day=9,
-    observance=victory_day_observance,
+    observance=weekend_to_monday,
 )
 
 DayOfRussia = Holiday(
     "Day of Russia",
     month=6,
     day=12,
-    observance=day_of_russia_observance,
+    observance=weekend_to_monday,
 )
 
 UnityDay = Holiday(
     "Unity Day",
     month=11,
     day=4,
-    observance=unity_day_observance,
+    observance=weekend_to_monday,
     start_date="2005",
 )
 
@@ -190,7 +177,6 @@ womens_day_extensions = [
     "2005-03-07",
     "2011-03-07",
     "2012-03-09",
-    "2022-03-07",
 ]
 
 labour_day_extensions = [
@@ -203,8 +189,6 @@ labour_day_extensions = [
     "2012-04-30",
     "2015-05-04",
     "2016-05-03",
-    # LabourDay Holiday extended to Tuesday.
-    "2022-05-03",
 ]
 
 victory_day_extensions = [
@@ -212,8 +196,6 @@ victory_day_extensions = [
     "2005-05-10",
     "2006-05-08",
     "2017-05-08",
-    # Victory Day Holiday extended to Tuesday.
-    "2022-05-10",
 ]
 
 day_of_russia_extensions = [
@@ -243,9 +225,6 @@ misc_adhoc = [
     # Trading Suspended.
     "2008-10-10",
     "2008-10-27",
-    # Non-Working Days.
-    "2020-06-24",
-    "2020-07-01",
 ]
 
 
@@ -277,11 +256,11 @@ class XMOSExchangeCalendar(ExchangeCalendar):
 
     name = "XMOS"
 
-    tz = ZoneInfo("Europe/Moscow")
+    tz = timezone("Europe/Moscow")
 
-    open_times = ((None, datetime.time(10)),)
+    open_times = ((None, time(10)),)
 
-    close_times = ((None, datetime.time(18, 45)),)
+    close_times = ((None, time(18, 45)),)
 
     @property
     def regular_holidays(self):

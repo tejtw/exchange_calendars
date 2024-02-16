@@ -14,10 +14,10 @@
 # limitations under the License.
 
 from datetime import time
-from zoneinfo import ZoneInfo
 
 from pandas.tseries.holiday import Easter, EasterMonday, GoodFriday, Holiday
 from pandas.tseries.offsets import Day
+from pytz import timezone
 
 from .common_holidays import (
     ascension_day,
@@ -39,7 +39,6 @@ GeneralPrayerDay = Holiday(
     month=1,
     day=1,
     offset=[Easter(), Day(26)],
-    end_date="2024",
 )
 AscensionDay = ascension_day()
 BankHoliday = Holiday(
@@ -87,7 +86,7 @@ class XCSEExchangeCalendar(ExchangeCalendar):
     """
 
     name = "XCSE"
-    tz = ZoneInfo("Europe/Copenhagen")
+    tz = timezone("Europe/Copenhagen")
     open_times = ((None, time(9)),)
     close_times = ((None, time(17)),)
 

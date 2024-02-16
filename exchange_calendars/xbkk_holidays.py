@@ -1,6 +1,4 @@
-from __future__ import annotations
-
-import datetime
+from datetime import timedelta
 
 import pandas as pd
 from pandas.tseries.holiday import (
@@ -14,23 +12,27 @@ from .common_holidays import european_labour_day, new_years_day, new_years_eve
 from .exchange_calendar import MONDAY, SUNDAY
 
 
-def new_years_eve_observance(dt: datetime.datetime) -> datetime.datetime | None:
+def new_years_eve_observance(holidays):
     # New Year's Eve is a holiday every year except for 2003 for some reason.
-    return weekend_to_monday(dt) if dt.year != 2003 else None
+    holidays = holidays[holidays.year != 2003]
+
+    return pd.to_datetime([weekend_to_monday(day) for day in holidays])
 
 
-def new_years_day_observance(dt: datetime.datetime) -> datetime.datetime | None:
+def new_years_day_observance(holidays):
     # There was no extra observance of New Year's Day in 2006.
-    return next_monday_or_tuesday(dt) if dt.year != 2006 else None
+    holidays = holidays[holidays.year != 2006]
+
+    return pd.to_datetime([next_monday_or_tuesday(day) for day in holidays])
 
 
-def songkran_festival_last_day_observance(dt: datetime.datetime) -> datetime.datetime:
+def songkran_festival_last_day_observance(dt):
     """
     This function is similar to the pandas function `next_monday_or_tuesday`
     except it does not observe Saturday holidays on Monday.
     """
     if dt.weekday() == SUNDAY or dt.weekday() == MONDAY:
-        return dt + datetime.timedelta(days=1)
+        return dt + timedelta(days=1)
     return dt
 
 

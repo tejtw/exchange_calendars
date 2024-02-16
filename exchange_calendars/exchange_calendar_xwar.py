@@ -13,13 +13,11 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-from __future__ import annotations
-
-import datetime
-from zoneinfo import ZoneInfo
+from datetime import time
 
 import pandas as pd
 from pandas.tseries.holiday import EasterMonday, GoodFriday, Holiday
+from pytz import timezone
 
 from .common_holidays import (
     all_saints_day,
@@ -35,12 +33,12 @@ from .common_holidays import (
 from .exchange_calendar import HolidayCalendar, ExchangeCalendar
 
 
-def not_2004(dt: datetime.datetime) -> datetime.datetime | None:
+def not_2004(datetime_index):
     """
     Christmas Eve is a holiday every year except for whatever reason it was a
     trading day in 2004.
     """
-    return dt if dt.year != 2004 else None
+    return datetime_index[datetime_index.year != 2004]
 
 
 NewYearsDay = new_years_day()
@@ -110,10 +108,10 @@ class XWARExchangeCalendar(ExchangeCalendar):
 
     name = "XWAR"
 
-    tz = ZoneInfo("Europe/Warsaw")
+    tz = timezone("Europe/Warsaw")
 
-    open_times = ((None, datetime.time(9)),)
-    close_times = ((None, datetime.time(17)),)
+    open_times = ((None, time(9)),)
+    close_times = ((None, time(17)),)
 
     @property
     def regular_holidays(self):

@@ -1,6 +1,5 @@
 from datetime import time
 from itertools import chain
-from zoneinfo import ZoneInfo
 
 from pandas import Timestamp
 from pandas.tseries.holiday import (
@@ -9,6 +8,7 @@ from pandas.tseries.holiday import (
     USPresidentsDay,
     USThanksgivingDay,
 )
+from pytz import timezone
 
 from .exchange_calendar import ExchangeCalendar
 from exchange_calendars.exchange_calendar import HolidayCalendar
@@ -34,7 +34,7 @@ class IEPAExchangeCalendar(ExchangeCalendar):
 
     name = "IEPA"
 
-    tz = ZoneInfo("America/New_York")
+    tz = timezone("America/New_York")
 
     open_times = ((None, time(20)),)
 

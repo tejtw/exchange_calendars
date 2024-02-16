@@ -47,7 +47,6 @@ from .exchange_calendar_xosl import XOSLExchangeCalendar
 from .exchange_calendar_xpar import XPARExchangeCalendar
 from .exchange_calendar_xphs import XPHSExchangeCalendar
 from .exchange_calendar_xpra import XPRAExchangeCalendar
-from .exchange_calendar_xsau import XSAUExchangeCalendar
 from .exchange_calendar_xses import XSESExchangeCalendar
 from .exchange_calendar_xsgo import XSGOExchangeCalendar
 from .exchange_calendar_xshg import XSHGExchangeCalendar
@@ -59,6 +58,8 @@ from .exchange_calendar_xtks import XTKSExchangeCalendar
 from .exchange_calendar_xtse import XTSEExchangeCalendar
 from .exchange_calendar_xwar import XWARExchangeCalendar
 from .exchange_calendar_xwbo import XWBOExchangeCalendar
+from .exchange_calendar_tejxtai import TEJ_XTAIExchangeCalendar
+from .exchange_calendar_tejxtai_morning_future import TEJ_morning_future_XTAIExchangeCalendar # 20230921
 from .us_futures_calendar import QuantopianUSFuturesCalendar
 from .weekday_calendar import WeekdayCalendar
 
@@ -105,7 +106,6 @@ _default_calendar_factories = {
     "XPAR": XPARExchangeCalendar,
     "XPHS": XPHSExchangeCalendar,
     "XPRA": XPRAExchangeCalendar,
-    "XSAU": XSAUExchangeCalendar,
     "XSES": XSESExchangeCalendar,
     "XSGO": XSGOExchangeCalendar,
     "XSHG": XSHGExchangeCalendar,
@@ -117,6 +117,8 @@ _default_calendar_factories = {
     "XTSE": XTSEExchangeCalendar,
     "XWAR": XWARExchangeCalendar,
     "XWBO": XWBOExchangeCalendar,
+    "TEJ_XTAI": TEJ_XTAIExchangeCalendar,
+    "XTAI_morning_future" : TEJ_morning_future_XTAIExchangeCalendar,
     # Miscellaneous calendars.
     "us_futures": QuantopianUSFuturesCalendar,
     "24/7": AlwaysOpenCalendar,
@@ -126,7 +128,6 @@ _default_calendar_aliases = {
     "NYSE": "XNYS",
     "NASDAQ": "XNYS",
     "BATS": "XNYS",
-    "XNAS": "XNYS",
     "FWB": "XFRA",
     "LSE": "XLON",
     "TSX": "XTSE",
@@ -149,6 +150,8 @@ _default_calendar_aliases = {
     "SSE": "XSHG",
     "TASE": "XTAE",
     "BVB": "XBSE",
+    "TEJ": "TEJ_XTAI",
+    "TEJ_morning_future" : "XTAI_morning_future", # 20230921
 }
 
 default_calendar_names = sorted(_default_calendar_factories.keys())

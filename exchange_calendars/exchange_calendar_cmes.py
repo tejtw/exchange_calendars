@@ -14,7 +14,6 @@
 # limitations under the License.
 
 from datetime import time
-from zoneinfo import ZoneInfo
 
 from pandas.tseries.holiday import (
     GoodFriday,
@@ -22,6 +21,7 @@ from pandas.tseries.holiday import (
     USPresidentsDay,
     USThanksgivingDay,
 )
+from pytz import timezone
 
 from .exchange_calendar import HolidayCalendar, ExchangeCalendar
 from .us_holidays import (
@@ -55,9 +55,9 @@ class CMESExchangeCalendar(ExchangeCalendar):
 
     name = "CMES"
 
-    tz = ZoneInfo("America/Chicago")
+    tz = timezone("America/Chicago")
 
-    open_times = ((None, time(17)),)
+    open_times = ((None, time(17, 1)),)
 
     close_times = ((None, time(17)),)
 

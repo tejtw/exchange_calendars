@@ -1,94 +1,12 @@
 from datetime import time
-from zoneinfo import ZoneInfo
 
 import pandas as pd
+from pytz import timezone
 
 from .precomputed_exchange_calendar import PrecomputedExchangeCalendar
 
 precomputed_shanghai_holidays = pd.to_datetime(
     [
-        "1991-01-01",
-        "1991-02-15",
-        "1991-02-18",
-        "1991-05-01",
-        "1991-10-01",
-        "1991-10-02",
-        "1992-01-01",
-        "1992-02-04",
-        "1992-02-05",
-        "1992-02-06",
-        "1992-05-01",
-        "1992-10-01",
-        "1992-10-02",
-        "1993-01-01",
-        "1993-01-25",
-        "1993-01-26",
-        "1993-10-01",
-        "1994-02-07",
-        "1994-02-08",
-        "1994-02-09",
-        "1994-02-10",
-        "1994-02-11",
-        "1994-05-02",
-        "1994-10-03",
-        "1994-10-04",
-        "1995-01-02",
-        "1995-01-30",
-        "1995-01-31",
-        "1995-02-01",
-        "1995-02-02",
-        "1995-02-03",
-        "1995-05-01",
-        "1995-10-02",
-        "1995-10-03",
-        "1996-01-01",
-        "1996-02-19",
-        "1996-02-20",
-        "1996-02-21",
-        "1996-02-22",
-        "1996-02-23",
-        "1996-02-26",
-        "1996-02-27",
-        "1996-02-28",
-        "1996-02-29",
-        "1996-03-01",
-        "1996-05-01",
-        "1996-09-30",
-        "1996-10-01",
-        "1996-10-02",
-        "1997-01-01",
-        "1997-02-03",
-        "1997-02-04",
-        "1997-02-05",
-        "1997-02-06",
-        "1997-02-07",
-        "1997-02-10",
-        "1997-02-11",
-        "1997-02-12",
-        "1997-02-13",
-        "1997-02-14",
-        "1997-05-01",
-        "1997-05-02",
-        "1997-06-30",
-        "1997-07-01",
-        "1997-10-01",
-        "1997-10-02",
-        "1997-10-03",
-        "1998-01-01",
-        "1998-01-02",
-        "1998-01-26",
-        "1998-01-27",
-        "1998-01-28",
-        "1998-01-29",
-        "1998-01-30",
-        "1998-02-02",
-        "1998-02-03",
-        "1998-02-04",
-        "1998-02-05",
-        "1998-02-06",
-        "1998-05-01",
-        "1998-10-01",
-        "1998-10-02",
         "1999-01-01",
         "1999-02-10",
         "1999-02-11",
@@ -488,7 +406,6 @@ precomputed_shanghai_holidays = pd.to_datetime(
         "2020-01-28",
         "2020-01-29",
         "2020-01-30",
-        "2020-01-31",  # http://english.sse.com.cn/news/newsrelease/c/4993503.shtml
         "2020-04-06",
         "2020-05-01",
         "2020-05-04",
@@ -520,23 +437,15 @@ precomputed_shanghai_holidays = pd.to_datetime(
         "2021-10-06",
         "2021-10-07",
         "2022-01-03",
-        "2022-01-31",
         "2022-02-01",
         "2022-02-02",
         "2022-02-03",
         "2022-02-04",
-        "2022-04-04",
         "2022-04-05",
-        "2022-05-02",
-        "2022-05-03",
-        "2022-05-04",
         "2022-06-03",
-        "2022-09-12",
         "2022-10-03",
         "2022-10-04",
         "2022-10-05",
-        "2022-10-06",
-        "2022-10-07",
         "2023-01-02",
         "2023-01-23",
         "2023-01-24",
@@ -545,36 +454,25 @@ precomputed_shanghai_holidays = pd.to_datetime(
         "2023-01-27",
         "2023-04-05",
         "2023-05-01",
-        "2023-05-02",
-        "2023-05-03",
         "2023-06-22",
-        "2023-06-23",
         "2023-09-29",
         "2023-10-02",
         "2023-10-03",
         "2023-10-04",
         "2023-10-05",
-        "2023-10-06",
-        "2024-01-01",  # 2024 holidays https://www.gov.cn/zhengce/content/202310/content_6911527.htm
-        "2024-02-09",  # http://english.sse.com.cn/start/trading/schedule/
+        "2024-01-01",
         "2024-02-12",
         "2024-02-13",
         "2024-02-14",
         "2024-02-15",
-        "2024-02-16",
         "2024-04-04",
-        "2024-04-05",
         "2024-05-01",
-        "2024-05-02",
-        "2024-05-03",
         "2024-06-10",
-        "2024-09-16",
         "2024-09-17",
         "2024-10-01",
         "2024-10-02",
         "2024-10-03",
         "2024-10-04",
-        "2024-10-07",
         "2025-01-01",
         "2025-01-29",
         "2025-01-30",
@@ -595,8 +493,9 @@ class XSHGExchangeCalendar(PrecomputedExchangeCalendar):
     Exchange calendar for the Shanghai Stock Exchange (XSHG, XSSC, SSE).
 
     Open time: 9:30 Asia/Shanghai
-    Lunch break: 11:30 - 13:00 Asia/Shanghai
     Close time: 15:00 Asia/Shanghai
+
+    NOTE: For now, we are skipping the intra-day break from 11:30 to 13:00.
 
     Due to the complexity around the Shanghai exchange holidays, we are
     hardcoding a list of holidays covering 1999-2025, inclusive. There are
@@ -604,16 +503,10 @@ class XSHGExchangeCalendar(PrecomputedExchangeCalendar):
     """
 
     name = "XSHG"
-    tz = ZoneInfo("Asia/Shanghai")
+    tz = timezone("Asia/Shanghai")
     open_times = ((None, time(9, 30)),)
-    break_start_times = ((None, time(11, 30)),)
-    break_end_times = ((None, time(13, 0)),)
     close_times = ((None, time(15, 0)),)
 
-    @classmethod
-    def precomputed_holidays(cls):
+    @property
+    def precomputed_holidays(self):
         return precomputed_shanghai_holidays
-
-    @classmethod
-    def bound_min(cls) -> pd.Timestamp:
-        return pd.Timestamp("1990-12-03")

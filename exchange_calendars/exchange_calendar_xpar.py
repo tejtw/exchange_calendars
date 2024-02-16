@@ -14,9 +14,9 @@
 # limitations under the License.
 
 from datetime import time
-from zoneinfo import ZoneInfo
 
 from pandas.tseries.holiday import EasterMonday, GoodFriday, Holiday
+from pytz import timezone
 
 from .common_holidays import (
     boxing_day,
@@ -82,9 +82,15 @@ class XPARExchangeCalendar(ExchangeCalendar):
     # Source: https://www.euronext.com/en/calendars-hours
     regular_early_close = time(14, 5)
 
-    name = "XPAR"  # Euronext Paris
-    tz = ZoneInfo("Europe/Paris")
+    @property
+    def name(self):
+        # Euronext Paris
+        return "XPAR"
+
+    tz = timezone("Europe/Paris")
+
     open_times = ((None, time(9)),)
+
     close_times = ((None, time(17, 30)),)
 
     @property

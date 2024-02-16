@@ -15,10 +15,10 @@
 
 from datetime import time, timedelta
 from itertools import chain
-from zoneinfo import ZoneInfo
 
 import pandas as pd
 from pandas.tseries.holiday import Holiday
+from pytz import timezone
 
 from .common_holidays import (
     eid_al_adha_first_day,
@@ -117,7 +117,7 @@ class XISTExchangeCalendar(ExchangeCalendar):
 
     name = "XIST"
 
-    tz = ZoneInfo("Europe/Istanbul")
+    tz = timezone("Europe/Istanbul")
 
     open_times = ((None, time(10)),)
 
@@ -151,11 +151,6 @@ class XISTExchangeCalendar(ExchangeCalendar):
             pd.Timestamp("2004-12-30"),  # Closure for redenomination
             pd.Timestamp("2004-12-31"),  # Closure for redenomination
             pd.Timestamp("2006-01-13"),  # Eid al Adha extra holiday
-            pd.Timestamp("2023-02-08"),  # Trade suspension after earthquake
-            pd.Timestamp("2023-02-09"),  # Trade suspension after earthquake
-            pd.Timestamp("2023-02-10"),  # Trade suspension after earthquake
-            pd.Timestamp("2023-02-13"),  # Trade suspension after earthquake
-            pd.Timestamp("2023-02-14"),  # Trade suspension after earthquake
         ]
 
         return list(
@@ -182,5 +177,5 @@ class XISTExchangeCalendar(ExchangeCalendar):
 
     @property
     def special_closes_adhoc(self):
-        early_close_days = pd.DatetimeIndex(EidAlFitrHalfDay + EidAlAdhaHalfDay)
+        early_close_days = EidAlFitrHalfDay + EidAlAdhaHalfDay
         return [(self.regular_early_close, early_close_days)]

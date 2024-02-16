@@ -14,7 +14,6 @@
 # limitations under the License.
 
 from datetime import time
-from zoneinfo import ZoneInfo
 
 from dateutil.relativedelta import MO
 from pandas import DateOffset, Timestamp
@@ -26,6 +25,7 @@ from pandas.tseries.holiday import (
     sunday_to_monday,
     weekend_to_monday,
 )
+from pytz import timezone
 
 from .common_holidays import (
     anzac_day,
@@ -103,14 +103,11 @@ QueensBirthday = Holiday(
     offset=[DateOffset(weekday=MO(2))],
 )
 
-# This was half-day until Christmas 2022 when was full-day.
-# As of 2023-01-15, ASX claim 2023 will also be full-days.
 LastTradingDayBeforeChristmas = Holiday(
     "Last Trading Day Before Christmas",
     month=12,
     day=24,
     start_date="2010",
-    end_date="2022",
     observance=previous_friday,
 )
 Christmas = christmas()
@@ -118,14 +115,11 @@ WeekendChristmas = weekend_christmas()
 BoxingDay = boxing_day()
 WeekendBoxingDay = weekend_boxing_day()
 
-# This was half-day until Christmas 2022 when was full-day.
-# As of 2023-01-15, ASX claim 2023 will also be full-days.
 LastTradingDayOfCalendarYear = Holiday(
     "Last Trading Day Of Calendar Year",
     month=12,
     day=31,
     start_date="2010",
-    end_date="2022",
     observance=previous_friday,
 )
 
@@ -134,7 +128,6 @@ NYEMonday1984AdHoc = Timestamp("1984-12-31")
 NYEMonday1990AdHoc = Timestamp("1990-12-31")
 Bicentennial1988 = Timestamp("1988-01-25")
 Y2KTesting = Timestamp("1999-12-31")
-QueenMourning2022 = Timestamp("2022-09-22")
 
 
 class XASXExchangeCalendar(ExchangeCalendar):
@@ -163,7 +156,7 @@ class XASXExchangeCalendar(ExchangeCalendar):
 
     name = "XASX"
 
-    tz = ZoneInfo("Australia/Sydney")
+    tz = timezone("Australia/Sydney")
 
     open_times = ((None, time(10)),)  # Zipline compatability (10,1); else (10,0)
 
@@ -199,7 +192,6 @@ class XASXExchangeCalendar(ExchangeCalendar):
             NYEMonday1990AdHoc,
             Bicentennial1988,
             Y2KTesting,
-            QueenMourning2022,
         ]
 
     @property
