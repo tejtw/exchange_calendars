@@ -1,6 +1,7 @@
 from datetime import time
 
-from exchange_calendars.calendar_helpers import UTC
+from pytz import UTC
+
 from .exchange_calendar import ExchangeCalendar
 
 
@@ -13,5 +14,4 @@ class WeekdayCalendar(ExchangeCalendar):
     name = "24/5"
     tz = UTC
     open_times = ((None, time(0)),)
-    close_times = ((None, time(0)),)
-    close_offset = 1
+    close_times = ((None, time(23, 59)),)

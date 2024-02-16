@@ -16,6 +16,8 @@ from __future__ import annotations
 import typing
 import pandas as pd
 
+from exchange_calendars.utils.memoize import lazyval
+
 if typing.TYPE_CHECKING:
     from exchange_calendars import ExchangeCalendar
 
@@ -25,6 +27,10 @@ class CalendarError(Exception):
 
     def __init__(self, **kwargs):
         self.kwargs = kwargs
+
+    @lazyval
+    def message(self):
+        return str(self)
 
     def __str__(self):
         msg = self.msg.format(**self.kwargs)
@@ -59,18 +65,27 @@ class CyclicCalendarAlias(CalendarError):
     msg = "Cycle in calendar aliases: [{cycle}]"
 
 
-class NoSessionsError(CalendarError):
-    """Raised if a requested calendar would have no sessions.
+class ScheduleFunctionWithoutCalendar(CalendarError):
+    """
+    Raised when schedule_function is called but there is not a calendar to be
+    used in the construction of an event rule.
+    """
 
-    NoSessionsError should be raised if `get_calendar` `start` and `end`
-    parameters are passed as dates between and inclusive of which there are
-    no sessions for the given calendar.
+    # TODO update message when new TradingSchedules are built
+    msg = (
+        "To use schedule_function, the TradingAlgorithm must be running on an "
+        "ExchangeTradingSchedule, rather than {schedule}."
+    )
+
+
+class ScheduleFunctionInvalidCalendar(CalendarError):
+    """
+    Raised when schedule_function is called with an invalid calendar argument.
     """
 
     msg = (
-        "The requested ExchangeCalendar, {calendar_name}, cannot be created as"
-        " there would be no sessions between the requested `start` ('{start}')"
-        " and `end` ('{end}') dates."
+        "Invalid calendar '{given_calendar}' passed to schedule_function. "
+        "Allowed options are {allowed_calendars}."
     )
 
 
@@ -99,7 +114,7 @@ class NotSessionError(ValueError):
 
     def __str__(self) -> str:
         msg = (
-            f"Parameter `{self.param_name}` takes a session"
+            f"Parameter `{self.param_name}` takes a session label"
             f" although received input that parsed to '{self.ts}' which"
         )
 
@@ -159,51 +174,6 @@ class DateOutOfBounds(ValueError):
         return msg
 
 
-class NotTradingMinuteError(ValueError):
-    """A timestamp assumed as a trading minute is not a trading minute.
-
-    Parameters
-    ----------
-    calendar
-        Calendar for which `minute` assumed as a trading minute.
-
-    minute
-        Minute assumed as a trading minute.
-
-    param_name
-        Name of a parameter that was to receive a trading minute.
-    """
-
-    def __init__(
-        self,
-        calendar: ExchangeCalendar,
-        minute: pd.Timestamp,
-        param_name: str,
-    ):
-        self.calendar = calendar
-        self.minute = minute
-        self.param_name = param_name
-
-    def __str__(self) -> str:
-        msg = (
-            f"Parameter `{self.param_name}` takes a trading minute although"
-            f" received input that parsed to '{self.minute}' which"
-        )
-        if self.minute < self.calendar.first_minute:
-            msg += (
-                " is earlier than the first trading minute of calendar"
-                f" '{self.calendar.name}' ('{self.calendar.first_session}')."
-            )
-        elif self.minute > self.calendar.last_minute:
-            msg += (
-                " is later than the last trading minute of calendar"
-                f" '{self.calendar.name}' ('{self.calendar.last_session}')."
-            )
-        else:
-            msg += f" is not a trading minute of calendar '{self.calendar.name}'."
-        return msg
-
-
 class MinuteOutOfBounds(ValueError):
     """A minute required to be within bounds of trading minutes is not.
 
@@ -230,109 +200,19 @@ class MinuteOutOfBounds(ValueError):
 
     def __str__(self) -> str:
         msg = f"Parameter `{self.param_name}` receieved as '{self.minute}' although"
-        if self.minute < self.calendar.first_minute:
+        if self.minute < self.calendar.first_trading_minute:
             msg += (
                 " cannot be earlier than the first trading minute of calendar"
-                f" '{self.calendar.name}' ('{self.calendar.first_minute}')."
+                f" '{self.calendar.name}' ('{self.calendar.first_trading_minute}')."
             )
-        elif self.minute > self.calendar.last_minute:
+        elif self.minute > self.calendar.last_trading_minute:
             msg += (
                 " cannot be later than the last trading minute of calendar"
-                f" '{self.calendar.name}' ('{self.calendar.last_minute}')."
+                f" '{self.calendar.name}' ('{self.calendar.last_trading_minute}')."
             )
         else:
             assert (
-                self.minute < self.calendar.first_minute
-                or self.minute > self.calendar.last_minute
+                self.minute < self.calendar.first_trading_minute
+                or self.minute > self.calendar.last_trading_minute
             )
         return msg
-
-
-class RequestedSessionOutOfBounds(ValueError):
-    """The requested session would fall beyond calendar bounds.
-
-    Parameters
-    ----------
-    calendar
-        Calendar for which session would be out-of-bounds.
-
-    too_early
-        True if requested session would be earlier than the first calendar
-            session.
-        False if requested session would be later than the last calendar
-            session.
-    """
-
-    def __init__(self, calendar: ExchangeCalendar, too_early: bool):
-        self.calendar = calendar
-        self.adverb = "before" if too_early else "after"
-        self.position = "first" if too_early else "last"
-        self.bound = calendar.first_session if too_early else calendar.last_session
-
-    def __str__(self) -> str:
-        return (
-            f"Requested session would fall {self.adverb} the calendar's {self.position}"
-            f" session ('{self.bound}')."
-        )
-
-
-class RequestedMinuteOutOfBounds(ValueError):
-    """The requested trading minute would fall beyond calendar bounds.
-
-    Parameters
-    ----------
-    calendar
-        Calendar for which minute would be out-of-bounds.
-
-    too_early
-        True if requested minute would be earlier than the first calendar
-            minute.
-        False if requested minute would be later than the last calendar
-            minute.
-    """
-
-    def __init__(self, calendar: ExchangeCalendar, too_early: bool):
-        self.calendar = calendar
-        self.adverb = "before" if too_early else "after"
-        self.position = "first" if too_early else "last"
-        self.bound = calendar.first_minute if too_early else calendar.last_minute
-
-    def __str__(self) -> str:
-        return (
-            f"Requested minute would fall {self.adverb} the calendar's {self.position}"
-            f" trading minute ('{self.bound}')."
-        )
-
-
-class IndexOverlapError(ValueError):
-    """Periods implied by indices overlap."""
-
-
-class IntervalsOverlapError(IndexOverlapError):
-    """Intervals of requested trading index would overlap."""
-
-    # pylint: disable=missing-return-type-doc
-    def __str__(self):  # noqa: D105
-        return (
-            "Unable to create trading index as intervals would overlap."
-            " This can occur when the frequency is longer than a break or"
-            " the gap between one session's close and the next session's"
-            " open (as reduced by any alignment). To shorten intervals"
-            " that would otherwise overlap either pass `curtail_overlaps`"
-            " as True or pass `force_close` and/or `force_break_close` as True."
-        )
-
-
-class IndicesOverlapError(IndexOverlapError):
-    """Indices of requested trading index would overlap."""
-
-    # pylint: disable=missing-return-type-doc
-    def __str__(self):  # noqa: D105
-        return (
-            "Unable to create trading index as an indice would fall to the"
-            " right of (later than) the subsequent indice. This can occur"
-            " when the frequency is longer than a break or the gap between"
-            " one session's close and the next session's open (as reduced"
-            " by any alignment). Consider  passing `closed` as `left` or"
-            " passing `force_close` and/or `force_break_close` as True."
-        )

@@ -1,7 +1,8 @@
 from datetime import time
 
+from pytz import UTC
+
 from .exchange_calendar import ExchangeCalendar
-from exchange_calendars.calendar_helpers import UTC
 
 
 class AlwaysOpenCalendar(ExchangeCalendar):
@@ -11,5 +12,4 @@ class AlwaysOpenCalendar(ExchangeCalendar):
     tz = UTC
     weekmask = "1111111"
     open_times = ((None, time(0)),)
-    close_times = ((None, time(0, 0)),)
-    close_offset = 1
+    close_times = ((None, time(23, 59)),)

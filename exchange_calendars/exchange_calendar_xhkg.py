@@ -16,13 +16,13 @@
 
 from datetime import time, timedelta
 from itertools import chain
-from zoneinfo import ZoneInfo
 
 import numpy as np
 import pandas as pd
 import toolz
 from pandas.tseries.holiday import EasterMonday, GoodFriday, Holiday, sunday_to_monday
 from pandas.tseries.offsets import LastWeekOfMonth, WeekOfMonth
+from pytz import timezone
 
 from .common_holidays import (
     boxing_day,
@@ -224,15 +224,6 @@ HKAdhocClosures = [
     # pd.Timestamp(2017-06-12'),  # 台风苗柏1702,期货夜盘17:35休市
     pd.Timestamp("2017-08-23"),  # 台风天鸽1713
     pd.Timestamp("2020-10-13"),  # 台风浪卡2016
-    pd.Timestamp(
-        "2021-10-13"
-    ),  # https://www.hkex.com.hk/News/Market-Communications/2021/2110132news?sc_lang=en
-    # In 2022, the mid-autumn festival falls on a Saturday (2022-09-10),
-    #  which means the day after is a Sunday. In 2022, HKSE had a holiday
-    #  on the Monday (2022-09-12). In the past they don't seem to have followed
-    #  this pattern. We'll have to wait and see before we generalise this into a rule.
-    pd.Timestamp("2022-09-12"),
-    pd.Timestamp("2023-07-17"),  # 8号台风泰利, 全天休市 https://www.hkex.com.hk/News/Market-Communications/2023/2307172news?sc_lang=en
 ]
 
 
@@ -278,7 +269,7 @@ class XHKGExchangeCalendar(PrecomputedExchangeCalendar):
     """
 
     name = "XHKG"
-    tz = ZoneInfo("Asia/Hong_Kong")
+    tz = timezone("Asia/Hong_Kong")
 
     open_times = (
         (None, time(10)),
@@ -291,26 +282,6 @@ class XHKGExchangeCalendar(PrecomputedExchangeCalendar):
         (None, time(12, 30)),
         (pd.Timestamp("2011-03-07"), time(12, 00)),
     )
-
-    @classmethod
-    def precomputed_holidays(cls):
-        lunisolar_holidays = (
-            chinese_buddhas_birthday_dates,
-            chinese_lunar_new_year_dates,
-            day_after_mid_autumn_festival_dates,
-            double_ninth_festival_dates,
-            dragon_boat_festival_dates,
-            qingming_festival_dates,
-        )
-        return lunisolar_holidays
-
-    @classmethod
-    def _earliest_precomputed_year(cls) -> int:
-        return max(map(np.min, cls.precomputed_holidays())).year
-
-    @classmethod
-    def _latest_precomputed_year(cls) -> int:
-        return min(map(np.max, cls.precomputed_holidays())).year
 
     @property
     def regular_holidays(self):
@@ -331,6 +302,26 @@ class XHKGExchangeCalendar(PrecomputedExchangeCalendar):
                 boxing_day(observance=boxing_day_obs),
             ]
         )
+
+    @property
+    def precomputed_holidays(self):
+        lunisolar_holidays = (
+            chinese_buddhas_birthday_dates,
+            chinese_lunar_new_year_dates,
+            day_after_mid_autumn_festival_dates,
+            double_ninth_festival_dates,
+            dragon_boat_festival_dates,
+            qingming_festival_dates,
+        )
+        return lunisolar_holidays
+
+    @property
+    def _earliest_precomputed_year(self) -> int:
+        return max(map(np.min, self.precomputed_holidays)).year
+
+    @property
+    def _latest_precomputed_year(self) -> int:
+        return min(map(np.max, self.precomputed_holidays)).year
 
     @property
     def adhoc_holidays(self):
@@ -455,7 +446,7 @@ class XHKGExchangeCalendar(PrecomputedExchangeCalendar):
             return arr[np.all(predicates, axis=0)]
 
         return [
-            (time, pd.DatetimeIndex(selection(lunar_new_years_eve, start, end)))
+            (time, selection(lunar_new_years_eve, start, end))
             for (start, time), (end, _) in toolz.sliding_window(
                 2,
                 toolz.concatv(self.regular_early_close_times, [(None, None)]),

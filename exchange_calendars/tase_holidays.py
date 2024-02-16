@@ -40,24 +40,9 @@ def _memorial_day(year):
     """
     Return the Hebrew date for Memorial Day in the given Hebrew year.
 
-    If either Memorial Day (MD) or Independence Day (ID) were to interfere with Sabbat,
-    including night before, then they are shifted forward or backward to avoid Sabbat.
-    ID always celebrated day after MD.
-    Wiki: https://en.wikipedia.org/wiki/Yom_HaZikaron#Timing
-    Better explanation: https://ph.yhb.org.il/en/05-04-09
+    Note: Independence Day is always celebrated the following day.
     """
-    d = dates.HebrewDate(year.year, 2, 4)
-    if d.weekday() == 1:
-        # MD on Sunday => shift forward to Monday
-        d = dates.HebrewDate(year.year, 2, 5)
-    elif d.weekday() == 6:
-        # MD on Friday => ID on Sabbat => shift back 2 days
-        d = dates.HebrewDate(year.year, 2, 2)
-    elif d.weekday() == 5:
-        # MD on Thursday => ID night before Sabbat => shift back 1 day
-        d = dates.HebrewDate(year.year, 2, 3)
-
-    return d
+    return dates.HebrewDate(year.year, 2, 4)
 
 
 def _pentecost(year):
@@ -237,7 +222,7 @@ class _HolidayOffset(Easter):
         pass
 
     @apply_wraps
-    def _apply(self, other):
+    def apply(self, other):
         current = self.holiday(other.year).to_pydate()
         current = datetime(current.year, current.month, current.day)
         current = localize_pydatetime(current, other.tzinfo)
@@ -262,9 +247,6 @@ class _HolidayOffset(Easter):
             other.microsecond,
         )
         return new
-
-    # backwards compat
-    apply = _apply
 
     def is_on_offset(self, dt):
         if self.normalize and not _is_normalized(dt):
@@ -354,70 +336,9 @@ SimchatTorahEve = Holiday(
 )
 SimchatTorah = Holiday("Simchat Torah", month=1, day=1, offset=[_SimchatTorah()])
 
-# Sukkoth interim days - the 3 days following Sukkoth
-SukkothInterimDay1 = Holiday(
-    "Sukkoth Interim Day",
-    month=1,
-    day=1,
-    offset=[_Sukkoth(), Day(1)],
-    days_of_week=(0, 1, 2, 3, 6)
-)
-SukkothInterimDay2 = Holiday(
-    "Sukkoth Interim Day",
-    month=1,
-    day=1,
-    offset=[_Sukkoth(), Day(2)],
-    days_of_week=(0, 1, 2, 3, 6)
-)
-SukkothInterimDay3 = Holiday(
-    "Sukkoth Interim Day",
-    month=1,
-    day=1,
-    offset=[_Sukkoth(), Day(3)],
-    days_of_week=(0, 1, 2, 3, 6)
-)
-SukkothInterimDay4 = Holiday(
-    "Sukkoth Interim Day",
-    month=1,
-    day=1,
-    offset=[_Sukkoth(), Day(4)],
-    days_of_week=(0, 1, 2, 3, 6)
-)
-SukkothInterimDay5 = Holiday(
-    "Sukkoth Interim Day",
-    month=1,
-    day=1,
-    offset=[_Sukkoth(), Day(5)],
-    days_of_week=(0, 1, 2, 3, 6)
-)
-
 # Passover interim days are the days between beginning and end of passover. Any otherwise regular business day in that
 # period becomes an early close day.
-PassoverInterimDay1 = Holiday(
-    "Passover Interim Day",
-    month=1,
-    day=1,
-    offset=[_Passover(), Day(1)],
-    days_of_week=(0, 1, 2, 3, 6),
-)
-PassoverInterimDay2 = Holiday(
-    "Passover Interim Day",
-    month=1,
-    day=1,
-    offset=[_Passover(), Day(2)],
-    days_of_week=(0, 1, 2, 3, 6),
-)
-PassoverInterimDay3 = Holiday(
-    "Passover Interim Day",
-    month=1,
-    day=1,
-    offset=[_Passover(), Day(3)],
-    days_of_week=(0, 1, 2, 3, 6),
-)
-PassoverInterimDay4 = Holiday(
-    "Passover Interim Day",
-    month=1,
-    day=1,
-    offset=[_Passover(), Day(4)],
-    days_of_week=(0, 1, 2, 3, 6),
-)
+PassoverInterimDay1 = Holiday("Passover Interim Day", month=1, day=1, offset=[_Passover(), Day(1)], days_of_week=(0, 1, 2, 3, 6))
+PassoverInterimDay2 = Holiday("Passover Interim Day", month=1, day=1, offset=[_Passover(), Day(2)], days_of_week=(0, 1, 2, 3, 6))
+PassoverInterimDay3 = Holiday("Passover Interim Day", month=1, day=1, offset=[_Passover(), Day(3)], days_of_week=(0, 1, 2, 3, 6))
+PassoverInterimDay4 = Holiday("Passover Interim Day", month=1, day=1, offset=[_Passover(), Day(4)], days_of_week=(0, 1, 2, 3, 6))

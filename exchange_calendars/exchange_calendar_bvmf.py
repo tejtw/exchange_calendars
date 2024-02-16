@@ -14,7 +14,6 @@
 # limitations under the License.
 
 from datetime import time
-from zoneinfo import ZoneInfo
 
 import pandas as pd
 from pandas.tseries.holiday import (
@@ -24,6 +23,7 @@ from pandas.tseries.holiday import (
     Holiday,
     previous_friday,
 )
+from pytz import timezone
 
 from .common_holidays import corpus_christi
 from .exchange_calendar import HolidayCalendar, ExchangeCalendar
@@ -39,8 +39,6 @@ AniversarioSaoPaulo = Holiday(
     "Aniversario de Sao Paulo",
     month=1,
     day=25,
-    # in 2022, BVMF was opened on this day
-    end_date="2022-01-01",
 )
 # Carnival Monday
 CarnavalSegunda = Holiday(
@@ -49,13 +47,7 @@ CarnavalSegunda = Holiday(
 # Carnival Tuesday
 CarnavalTerca = Holiday("Carnaval Terca", month=1, day=1, offset=[Easter(), Day(-47)])
 # Ash Wednesday (short day)
-QuartaCinzas = Holiday(
-    "Quarta Cinzas",
-    month=1,
-    day=1,
-    offset=[Easter(), Day(-46)],
-    start_date="2016-01-01",
-)
+QuartaCinzas = Holiday("Quarta Cinzas", month=1, day=1, offset=[Easter(), Day(-46)])
 # Good Friday
 SextaPaixao = GoodFriday
 # Feast of the Most Holy Body of Christ
@@ -81,11 +73,7 @@ Constitucionalista_prepandemic = Holiday(
     end_date="2020-01-01",
 )
 Constitucionalista_pospandemic = Holiday(
-    "Constitucionalista pos-pandemia",
-    month=7,
-    day=9,
-    start_date="2021-01-01",
-    end_date="2022-01-01",
+    "Constitucionalista pos-pandemia", month=7, day=9, start_date="2021-01-01"
 )
 # Independence Day
 Independencia = Holiday(
@@ -113,11 +101,7 @@ ProclamacaoRepublica = Holiday(
 )
 # Day of Black Awareness
 ConscienciaNegra = Holiday(
-    "Dia da Consciencia Negra",
-    month=11,
-    day=20,
-    start_date="2004-01-01",
-    end_date="2022-01-01",
+    "Dia da Consciencia Negra", month=11, day=20, start_date="2004-01-01"
 )
 # Christmas Eve
 VesperaNatal = Holiday(
@@ -154,7 +138,6 @@ class BVMFExchangeCalendar(ExchangeCalendar):
     - Sao Paulo City Anniversary (Jan 25)
     - Carnaval Monday (48 days before Easter)
     - Carnaval Tuesday (47 days before Easter)
-    - Ash Wednesday (short day / half day trading) (46 days before Easter)
     - Passion of the Christ (Good Friday, 2 days before Easter)
     - Corpus Christi (60 days after Easter)
     - Tiradentes (April 21)
@@ -174,9 +157,7 @@ class BVMFExchangeCalendar(ExchangeCalendar):
 
     name = "BVMF"
 
-    tz = ZoneInfo("America/Sao_Paulo")
-
-    regular_late_open = time(13)
+    tz = timezone("America/Sao_Paulo")
 
     open_times = ((None, time(10)),)
 
@@ -214,12 +195,3 @@ class BVMFExchangeCalendar(ExchangeCalendar):
                 AnoNovo,
             ]
         )
-
-    @property
-    def special_opens(self):
-        return [
-            (
-                self.regular_late_open,
-                HolidayCalendar([QuartaCinzas]),
-            ),
-        ]

@@ -14,10 +14,10 @@
 # limitations under the License.
 
 from datetime import time
-from zoneinfo import ZoneInfo
 
 from pandas import Timestamp
 from pandas.tseries.holiday import EasterMonday, GoodFriday, Holiday, previous_workday
+from pytz import timezone
 
 from .common_holidays import (
     boxing_day,
@@ -40,16 +40,10 @@ EuropeanLabourDay = european_labour_day()
 # starting in 2015.
 WhitMonday2007AdHoc = Timestamp("2007-05-28")
 
-# Whit Monday and the Day of German Unity have been observed regularly, but in 2022 regular trading took place instead.
-#  It's unclear if it will be observed in 2023.
-WhitMondayUntil2022 = whit_monday(start_date="2015-01-01", end_date="2022-01-01")
+WhitMonday = whit_monday(start_date="2015-01-01")
 
-DayOfGermanUnityUntil2022 = Holiday(
-    "Day of German Unity",
-    month=10,
-    day=3,
-    start_date="2014-01-01",
-    end_date="2022-01-01",
+DayOfGermanUnity = Holiday(
+    "Day of German Unity", month=10, day=3, start_date="2014-01-01"
 )
 
 # Reformation Day was a German national holiday in 2017.
@@ -102,7 +96,7 @@ class XFRAExchangeCalendar(ExchangeCalendar):
 
     name = "XFRA"
 
-    tz = ZoneInfo("CET")
+    tz = timezone("CET")
 
     open_times = ((None, time(9)),)
 
@@ -116,8 +110,8 @@ class XFRAExchangeCalendar(ExchangeCalendar):
                 GoodFriday,
                 EasterMonday,
                 EuropeanLabourDay,
-                WhitMondayUntil2022,
-                DayOfGermanUnityUntil2022,
+                WhitMonday,
+                DayOfGermanUnity,
                 ChristmasEve,
                 Christmas,
                 BoxingDay,

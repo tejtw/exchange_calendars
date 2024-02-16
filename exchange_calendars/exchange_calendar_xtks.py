@@ -1,8 +1,8 @@
 from datetime import time
 from itertools import chain
-from zoneinfo import ZoneInfo
 
 import pandas as pd
+from pytz import UTC, timezone
 
 from .exchange_calendar import HolidayCalendar, ExchangeCalendar
 from .xtks_holidays import (
@@ -52,8 +52,11 @@ class XTKSExchangeCalendar(ExchangeCalendar):
     Exchange calendar for the Tokyo Stock Exchange
 
     First session: 9:00am - 11:30am
-    Lunch Break: 11:30am - 12:30pm
+    Lunch
     Second session: 12:30pm - 3:00pm
+
+    NOTE: we are treating the two sessions per day as one session for now,
+    because we will not be handling minutely data in the immediate future.
 
     Regularly-Observed Holidays (see xtks_holidays.py for more info):
     - New Year's Holidays (Dec. 31 - Jan. 3)
@@ -80,17 +83,16 @@ class XTKSExchangeCalendar(ExchangeCalendar):
 
     name = "XTKS"
 
-    tz = ZoneInfo("Asia/Tokyo")
+    tz = timezone("Asia/Tokyo")
 
     open_times = ((None, time(9)),)
-    break_start_times = ((None, time(11, 30)),)
-    break_end_times = ((None, time(12, 30)),)
+
     close_times = ((None, time(15)),)
 
-    @classmethod
-    def bound_min(cls) -> pd.Timestamp:
+    @property
+    def bound_start(self) -> pd.Timestamp:
         # not tracking holiday info farther back than 1997
-        return pd.Timestamp("1997-01-01")
+        return pd.Timestamp("1997-01-01", tz=UTC)
 
     @property
     def regular_holidays(self):

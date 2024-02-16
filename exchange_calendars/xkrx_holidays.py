@@ -7,14 +7,13 @@ from .pandas_extensions.korean_holiday import (
     KoreanSolarHoliday,
     KoreanLunarHoliday,
     alternative_holiday,
-    alternative_holiday_for_seollal_and_chuseok,
-    alternative_holiday_for_childrens_day,
+    childrens_day_alternative_holiday,
     last_business_day,
 )
 
 # Original precomputed KRX holidays
 # that had been maintained formerly in exchange_calendar_xkrx.py.
-original_precomputed_krx_holidays = pd.DatetimeIndex(
+original_precomputed_krx_holidays = pd.to_datetime(
     [
         "1986-01-01",
         "1986-01-02",
@@ -540,7 +539,7 @@ original_precomputed_krx_holidays = pd.DatetimeIndex(
 
 # Automatically generated holidays using /etc/update_xkrx_holidays.py script.
 # Note that there are some missing holidays compared to the original holidays.
-dumped_precomputed_krx_holidays = pd.DatetimeIndex(
+dumped_precomputed_krx_holidays = pd.to_datetime(
     [
         "1975-02-12",
         "1975-03-10",
@@ -1080,36 +1079,10 @@ dumped_precomputed_krx_holidays = pd.DatetimeIndex(
         "2021-03-01",
         "2021-05-05",
         "2021-05-19",
-        "2021-08-16",
         "2021-09-20",
         "2021-09-21",
         "2021-09-22",
-        "2021-10-04",
-        "2021-10-11",
         "2021-12-31",
-        "2022-01-31",
-        "2022-02-01",
-        "2022-02-02",
-        "2022-03-01",
-        "2022-03-09",
-        "2022-05-05",
-        "2022-06-01",
-        "2022-06-06",
-        "2022-08-15",
-        "2022-09-09",
-        "2022-09-12",
-        "2022-10-03",
-        "2022-10-10",
-        "2022-12-30",
-    ]
-)
-
-# This index contains holidays that were manually copied from the exchange website
-#  (https://global.krx.co.kr/contents/GLB/05/0501/0501110000/GLB0501110000.jsp)
-manually_added_holidays = pd.DatetimeIndex(
-    [
-        "2023-05-29",  # Buddha's birthday holiday in lieu
-        "2023-10-02",  # Extra day for Chuseok holiday
     ]
 )
 
@@ -1117,7 +1090,7 @@ manually_added_holidays = pd.DatetimeIndex(
 # Merging two holidays to get full precomputed holidays list.
 precomputed_krx_holidays = original_precomputed_krx_holidays.union(
     dumped_precomputed_krx_holidays
-).union(manually_added_holidays)
+)
 
 
 # Korean regular holidays
@@ -1143,14 +1116,14 @@ SeollalBefore = KoreanLunarHoliday(
     month=1,
     day=1,
     offset=Day(-1),
-    observance=alternative_holiday_for_seollal_and_chuseok,
+    observance=alternative_holiday,
     start_date=pd.Timestamp("1989-01-01"),
 )  # Seollal gained additional before/after holidays since 1989
 Seollal = KoreanLunarHoliday(
     "Seollal (New Year's Day by the lunar)",
     month=1,
     day=1,
-    observance=alternative_holiday_for_seollal_and_chuseok,
+    observance=alternative_holiday,
     start_date=pd.Timestamp("1985-01-01"),
 )  # Seollal newly became holiday since 1985
 SeollalAfter = KoreanLunarHoliday(
@@ -1158,11 +1131,11 @@ SeollalAfter = KoreanLunarHoliday(
     month=1,
     day=1,
     offset=Day(1),
-    observance=alternative_holiday_for_seollal_and_chuseok,
+    observance=alternative_holiday,
     start_date=pd.Timestamp("1989-01-01"),
 )  # Seollal gained additional before/after holidays since 1989
 IndependenceMovementDay = KoreanSolarHoliday(
-    "Independence Movement Day", month=3, day=1, observance=alternative_holiday
+    "Independence Movement Day", month=3, day=1
 )
 ArborDay = KoreanSolarHoliday(
     "Arbor Day",
@@ -1179,7 +1152,7 @@ LoborDay = KoreanSolarHoliday(
     "Labor Day", month=5, day=1, start_date=pd.Timestamp("1994-01-01")
 )  # Labor day changed it's day from 03/10 to 05/01 since 1994
 ChildrensDay = KoreanSolarHoliday(
-    "Children's Day", month=5, day=5, observance=alternative_holiday_for_childrens_day
+    "Children's Day", month=5, day=5, observance=childrens_day_alternative_holiday
 )
 MemorialDay = KoreanSolarHoliday("Memorial Day", month=6, day=6)
 ConstitutionDay = KoreanSolarHoliday(
@@ -1189,22 +1162,20 @@ ConstitutionDay = KoreanSolarHoliday(
     start_date=pd.Timestamp("1949-10-01"),
     end_date=pd.Timestamp("2007-12-31"),
 )  # Constitution day was holiday from 1949 to 2007
-NationalLiberationDay = KoreanSolarHoliday(
-    "National Liberation Day", month=8, day=15, observance=alternative_holiday
-)
+NationalLiberationDay = KoreanSolarHoliday("National Liberation Day", month=8, day=15)
 ChuseokBefore = KoreanLunarHoliday(
     "Chuseok (Korean Thanksgiving Day) (-1 day)",
     month=8,
     day=15,
     offset=Day(-1),
-    observance=alternative_holiday_for_seollal_and_chuseok,
+    observance=alternative_holiday,
     start_date=pd.Timestamp("1989-01-01"),
 )  # Chuseok gained additional before holiday since 1989, along with Seollal
 Chuseok = KoreanLunarHoliday(
     "Chuseok (Korean Thanksgiving Day)",
     month=8,
     day=15,
-    observance=alternative_holiday_for_seollal_and_chuseok,
+    observance=alternative_holiday,
     start_date=pd.Timestamp("1949-01-01"),
 )  # Chuseok originally had no before/after holidays
 ChuseokAfter = KoreanLunarHoliday(
@@ -1212,7 +1183,7 @@ ChuseokAfter = KoreanLunarHoliday(
     month=8,
     day=15,
     offset=Day(1),
-    observance=alternative_holiday_for_seollal_and_chuseok,
+    observance=alternative_holiday,
     start_date=pd.Timestamp("1986-01-01"),
 )  # Chuseok gained additional following holiday since 1986
 ArmedForcesDay = KoreanSolarHoliday(
@@ -1223,7 +1194,7 @@ ArmedForcesDay = KoreanSolarHoliday(
     end_date=pd.Timestamp("1990-12-31"),
 )  # Armed forces day was holiday from 1976 to 1990
 KoreanNationalFoundationDay = KoreanSolarHoliday(
-    "Korean National Foundation Day", month=10, day=3, observance=alternative_holiday
+    "Korean National Foundation Day", month=10, day=3
 )
 OldHangulProclamationDay = KoreanSolarHoliday(
     "Hangul Proclamation Day",
@@ -1237,7 +1208,6 @@ HangulProclamationDay = KoreanSolarHoliday(
     month=10,
     day=9,
     start_date=pd.Timestamp("2013-01-01"),
-    observance=alternative_holiday,
 )  # Hangeul Day became national holiday again in 2013
 Christmas = KoreanSolarHoliday("Christmas", month=12, day=25)
 
@@ -1301,7 +1271,7 @@ krx_regular_holiday_rules = (
 # Theses are used for special offsets (30 minutes or 1 hour delay in schedule)
 # https://ko.wikipedia.org/wiki/%EC%97%B0%EB%8F%84%EB%B3%84_%EB%8C%80%ED%95%99%EC%88%98%ED%95%99%EB%8A%A5%EB%A0%A5%EC%8B%9C%ED%97%98
 
-precomputed_csat_days = pd.DatetimeIndex(
+precomputed_csat_days = pd.to_datetime(
     [
         "1993-08-20",  # https://www.hankyung.com/news/article/1993081702291                      0940~1140, 1320~1520 => 1010~1210, 1350~1550
         "1993-11-16",  # https://www.hankyung.com/news/article/1993111501631                      0940~1140, 1320~1520 => 1010~1210, 1350~1550

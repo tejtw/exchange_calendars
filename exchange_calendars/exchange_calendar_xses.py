@@ -1,7 +1,7 @@
 from datetime import time
-from zoneinfo import ZoneInfo
 
 import pandas as pd
+from pytz import timezone
 
 from .precomputed_exchange_calendar import PrecomputedExchangeCalendar
 
@@ -362,39 +362,6 @@ precomputed_ses_holidays = pd.to_datetime(
         "2021-08-09",  # National Day
         "2021-11-04",  # Deepavali
         "2021-12-25",  # Christmas Day. TODO: 2021-12-24 and 2021-12-31 are half days
-        # TODO: Eve of Chinese New Year (2022-01-31) is a half day
-        "2022-02-01",  # Chinese New Year
-        "2022-02-02",  # Chinese New Year
-        "2022-04-15",  # Good Friday
-        "2022-05-02",  # Labour Day (in lieu)
-        "2022-05-03",  # Hari Raya Puasa
-        "2022-05-16",  # Vesak Day (in lieu)
-        "2022-07-11",  # Hari Raya Haji (in lieu)
-        "2022-08-09",  # National Day
-        "2022-10-24",  # Deepavali
-        "2022-12-26",  # Christmas Day (in lieu)
-        "2023-01-02",  # New Year's Day (in lieu)
-        "2023-01-23",  # Chinese New Year
-        "2023-01-24",  # Chinese New Year
-        "2023-04-07",  # Good Friday
-        # Hari Raya Puasa is on 2023-04-22 (Saturday), and not rolled forward
-        "2023-05-01",  # Labour Day
-        "2023-06-02",  # Vesak Day
-        "2023-06-29",  # Hari Raya Haji
-        "2023-08-09",  # National Day
-        "2023-09-01",  # Polling Day
-        "2023-11-13",  # Deepavali (in lieu)
-        "2023-12-25",  # Christmas Day
-        "2024-01-01",  # New Year's Day
-        "2024-02-12",  # Chinese New Year (in lieu)
-        "2024-03-29",  # Good Friday
-        "2024-04-10",  # Hari Raya Puasa
-        "2024-05-01",  # Labour Day
-        "2024-05-22",  # Vesak Day
-        "2024-06-17",  # Hari Raya Haji
-        "2024-08-09",  # National Day
-        "2024-10-31",  # Deepavali
-        "2024-12-25",  # Christmas Day
     ]
 )
 
@@ -422,10 +389,10 @@ class XSESExchangeCalendar(PrecomputedExchangeCalendar):
     """
 
     name = "XSES"
-    tz = ZoneInfo("Asia/Singapore")
+    tz = timezone("Asia/Singapore")
     open_times = ((None, time(9)),)
     close_times = ((None, time(17, 0)),)
 
-    @classmethod
-    def precomputed_holidays(cls):
+    @property
+    def precomputed_holidays(self):
         return precomputed_ses_holidays

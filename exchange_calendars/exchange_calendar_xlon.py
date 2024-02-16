@@ -14,7 +14,6 @@
 # limitations under the License.
 
 from datetime import time
-from zoneinfo import ZoneInfo
 
 import pandas as pd
 from pandas.tseries.holiday import (
@@ -26,6 +25,7 @@ from pandas.tseries.holiday import (
     previous_friday,
     weekend_to_monday,
 )
+from pytz import timezone
 
 from .common_holidays import (
     boxing_day,
@@ -75,10 +75,9 @@ MayBank_post_2020 = Holiday(
 )
 
 
-# Spring bank holiday has three exceptions based on the Golden, Diamond & Platinum Jubilee
+# Spring bank holiday has two exceptions based on the Golden & Diamond Jubilee
 # 2002-05-27 Spring bank holiday removed for Golden Jubilee
 # 2012-05-28 Spring bank holiday removed for Diamond Jubilee
-# 2022-05-30 Spring bank holiday moved to 2022-06-02 to be adjacent to the Platinum Jubilee day 2022-06-03
 
 # Spring bank holiday
 SpringBank_pre_2002 = Holiday(
@@ -98,21 +97,12 @@ SpringBank_post_2002_pre_2012 = Holiday(
     end_date=pd.Timestamp("2011-12-31"),
 )
 
-SpringBank_post_2012_pre_2022 = Holiday(
+SpringBank_post_2012 = Holiday(
     "Spring Bank Holiday",
     month=5,
     day=31,
     offset=DateOffset(weekday=MO(-1)),
     start_date=pd.Timestamp("2013-01-01"),
-    end_date=pd.Timestamp("2021-12-31"),
-)
-
-SpringBank_post_2022 = Holiday(
-    "Spring Bank Holiday",
-    month=5,
-    day=31,
-    offset=DateOffset(weekday=MO(-1)),
-    start_date=pd.Timestamp("2023-01-01"),
 )
 
 # Summer bank holiday
@@ -188,7 +178,7 @@ class XLONExchangeCalendar(ExchangeCalendar):
 
     name = "XLON"
 
-    tz = ZoneInfo("Europe/London")
+    tz = timezone("Europe/London")
 
     open_times = ((None, time(8)),)
 
@@ -206,8 +196,7 @@ class XLONExchangeCalendar(ExchangeCalendar):
                 MayBank_post_2020,
                 SpringBank_pre_2002,
                 SpringBank_post_2002_pre_2012,
-                SpringBank_post_2012_pre_2022,
-                SpringBank_post_2022,
+                SpringBank_post_2012,
                 SummerBank,
                 Christmas,
                 WeekendChristmas,
@@ -231,13 +220,6 @@ class XLONExchangeCalendar(ExchangeCalendar):
             # Diamond Jubilee
             pd.Timestamp("2012-06-04"),
             pd.Timestamp("2012-06-05"),
-            # Platinum Jubilee (moved Spring bank holiday followed by Jubilee day)
-            pd.Timestamp("2022-06-02"),
-            pd.Timestamp("2022-06-03"),
-            # Queen Elizabeth II Funeral
-            pd.Timestamp("2022-09-19"),
-            # Coronation of King Charles III
-            pd.Timestamp("2023-05-08"),
             # Royal Weddings
             # Wedding Day of Princess Anne and Mark Phillips
             pd.Timestamp("1973-11-14"),

@@ -14,10 +14,10 @@
 # limitations under the License.
 
 from datetime import time
-from zoneinfo import ZoneInfo
 
 from pandas.tseries.holiday import Easter, EasterMonday, GoodFriday, Holiday
 from pandas.tseries.offsets import Day
+from pytz import timezone
 
 from .common_holidays import (
     all_saints_day,
@@ -125,9 +125,15 @@ class XLISExchangeCalendar(ExchangeCalendar):
     # Converted 14:05 CET to local time zone WET.
     regular_early_close = time(13, 5)
 
-    name = "XLIS"  # Euronext Lisbon
-    tz = ZoneInfo("Europe/Lisbon")
+    @property
+    def name(self):
+        # Euronext Lisbon
+        return "XLIS"
+
+    tz = timezone("Europe/Lisbon")
+
     open_times = ((None, time(8)),)
+
     close_times = ((None, time(16, 30)),)
 
     @property

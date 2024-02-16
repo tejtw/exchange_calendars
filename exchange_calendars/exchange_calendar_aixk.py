@@ -1,6 +1,5 @@
 from datetime import time
 from itertools import chain
-from zoneinfo import ZoneInfo
 
 import pandas as pd
 from pandas.tseries.holiday import (
@@ -9,6 +8,7 @@ from pandas.tseries.holiday import (
     nearest_workday,
     next_workday,
 )
+from pytz import timezone
 
 from .common_holidays import new_years_day, eid_al_adha_first_day
 from .exchange_calendar import (
@@ -95,29 +95,12 @@ ConstitutionDay = Holiday(
     observance=next_monday,
 )
 
-RepublicDayHoliday = Holiday(
-    "Republic Day Holiday",
-    month=10,
-    day=24,
-    observance=next_monday,
-    start_date=pd.Timestamp("2022-01-01"),
-)
-
-RepublicDay = Holiday(
-    "Republic Day",
-    month=10,
-    day=25,
-    observance=next_monday,
-    start_date=pd.Timestamp("2022-01-01"),
-)
-
 FirstPresidentDay = Holiday(
     "First President Day",
     month=12,
     day=1,
     observance=next_monday,
     start_date=pd.Timestamp("2013-01-01"),
-    end_date="2022",
 )
 
 IndependenceDay = Holiday(
@@ -132,7 +115,6 @@ IndependenceDayHoliday = Holiday(
     month=12,
     day=17,
     observance=next_monday,
-    end_date="2022",
 )
 
 
@@ -157,33 +139,27 @@ class AIXKExchangeCalendar(ExchangeCalendar):
       - Capital City Day
       - Kurban Ait Holiday (Eid-al-Adha)
       - Constitution Day
-      - Republic Day Holiday
-      - Republic Day
       - First President Day
       - Independence Day
-
-    Holidays No Longer Observed:
-      - Independence Day Holiday (until 2021, inclusive)
-      - First President Day (until 2021, inclusive)
-
+      - Independence Day Holiday
     Early Closes:
       - None
     """
 
     name = "AIXK"
 
-    tz = ZoneInfo("Asia/Almaty")
+    tz = timezone("Asia/Almaty")
 
     open_times = ((None, time(11)),)
 
     close_times = ((None, time(17, 00)),)
 
-    @classmethod
-    def bound_min(cls) -> pd.Timestamp:
-        return pd.Timestamp("2017-01-01")
+    @property
+    def bound_start(self) -> pd.Timestamp:
+        return pd.Timestamp("2017-01-01", tz="UTC")
 
-    def _bound_min_error_msg(self, start: pd.Timestamp) -> str:
-        msg = super()._bound_min_error_msg(start)
+    def _bound_start_error_msg(self, start: pd.Timestamp) -> str:
+        msg = super()._bound_start_error_msg(start)
         return msg + f" (The exchange {self.name} was founded in 2017.)"
 
     @property
@@ -202,8 +178,6 @@ class AIXKExchangeCalendar(ExchangeCalendar):
                 VictoryDayHoliday,
                 CapitalCityDay,
                 ConstitutionDay,
-                RepublicDayHoliday,
-                RepublicDay,
                 FirstPresidentDay,
                 IndependenceDay,
                 IndependenceDayHoliday,
@@ -233,14 +207,7 @@ class AIXKExchangeCalendar(ExchangeCalendar):
             pd.Timestamp("2020-12-18"),
             # Bridge Day between Weekend - Capital City day
             pd.Timestamp("2021-06-05"),
-            # New Year holiday
-            pd.Timestamp("2022-01-03"),
-            pd.Timestamp("2022-01-04"),
             # Bridge Day between Weekend - Women's day
             pd.Timestamp("2022-03-07"),
-            # Defender's day
-            pd.Timestamp("2022-05-10"),
-            # Bridge Day between Weekend - Constitution day
-            pd.Timestamp("2022-08-29"),
         ]
         return list(chain(misc_holidays, eid_al_adha_first_day))
