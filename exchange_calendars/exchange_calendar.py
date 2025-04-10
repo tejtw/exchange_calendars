@@ -417,8 +417,8 @@ class ExchangeCalendar(ABC):
         break_diff = (self.schedule.break_end - self.schedule.break_start).fillna(
             pd.Timedelta(seconds=0)
         )
-        diff = (close_to_open_diff - break_diff).astype("timedelta64[m]")
-        return diff + 1
+        diff = (close_to_open_diff - break_diff).astype("timedelta64[s]") 
+        return diff + pd.Timedelta(1, unit = 'm')
 
     def minutes_count_for_sessions_in_range(
         self, start_session: pd.Timestamp, end_session: pd.Timestamp
@@ -437,7 +437,7 @@ class ExchangeCalendar(ABC):
         int: The total number of minutes for the contiguous chunk of sessions.
              between start_session and end_session, inclusive.
         """
-        return int(self._minutes_per_session[start_session:end_session].sum())
+        return self._minutes_per_session[start_session:end_session].sum().total_seconds() / 60
 
     @property
     def regular_holidays(self):
