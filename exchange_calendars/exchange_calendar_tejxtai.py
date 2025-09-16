@@ -2171,9 +2171,9 @@ _close_dates = pd.to_datetime([
 def get_dynamic_close_days(static_close_dates):
     current_date = pd.to_datetime((datetime.today()+relativedelta(years= 1)).strftime('%Y%m%d'))
     
-    data = tejapi.get('TWN/TRADEDAY_TWSE',zdate= {'gt':static_close_dates[-1],'lte':current_date},opts = {'columns':['zdate','day_week','tradeday_cno']},paginate=True)
+    data = tejapi.fastget('TWN/TRADEDAY_TWSE', tradeday_cno = 0 ,zdate= {'gt':static_close_dates[-1],'lte':current_date},opts = {'columns':['zdate']},paginate=True)
     
-    dynamic_close_dates = data.loc[data['tradeday_cno'] == 0,'zdate'].apply(lambda x : x.tz_localize(None)).tolist()
+    dynamic_close_dates = data['zdate'].apply(lambda x : x.tz_localize(None)).tolist()
     return dynamic_close_dates
     
 dynamic_close_dates = get_dynamic_close_days(_close_dates)
@@ -2192,9 +2192,9 @@ class TEJ_XTAIExchangeCalendar(ExchangeCalendar):
     
     weekmask = "1111111"
     
-    start_date = pd.to_datetime('20050101').tz_localize('utc')
+    start_date = pd.to_datetime('20050101').tz_localize('UTC')
     
-    end_date = pd.to_datetime(datetime.now().strftime('%Y%m%d')).tz_localize('utc')
+    end_date = pd.to_datetime(datetime.now().strftime('%Y%m%d')).tz_localize('UTC')
     
     @property
     def default_start(self,) :

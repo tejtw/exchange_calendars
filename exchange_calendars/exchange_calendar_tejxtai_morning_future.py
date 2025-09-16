@@ -20,7 +20,7 @@ class TEJ_morning_future_XTAIExchangeCalendar(TEJ_XTAIExchangeCalendar):
     
     weekmask = "1111111"
     
-    start_date = pd.to_datetime('20050101').tz_localize('utc')
+    start_date = pd.to_datetime('20050101').tz_localize('UTC')
     
-    end_date = pd.to_datetime((datetime.now()+relativedelta(years = 1)).strftime('%Y%m%d')).tz_localize('utc')
+    end_date = pd.to_datetime((datetime.now()+relativedelta(years = 1)).strftime('%Y%m%d')).tz_localize('UTC')
     
