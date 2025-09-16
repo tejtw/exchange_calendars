@@ -9,6 +9,8 @@ from exchange_calendars import errors
 
 if typing.TYPE_CHECKING:
     from exchange_calendars import ExchangeCalendar
+    
+from pytz import UTC
 
 NANOSECONDS_PER_MINUTE = int(6e10)
 
@@ -214,7 +216,7 @@ def parse_date(
     """
     ts = parse_timestamp(date, param_name, utc=False)
     
-    if not (ts.tz is None or ts.tzname() == "UTC"):
+    if not (ts.tz is None or str(ts.tz) == "UTC"):
         raise ValueError(
             f"Parameter `{param_name}` parsed as '{ts}' although a Date must be"
             f" timezone naive or have timezone as 'UTC'."

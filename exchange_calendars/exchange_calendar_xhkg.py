@@ -426,7 +426,7 @@ class XHKGExchangeCalendar(PrecomputedExchangeCalendar):
     @property
     def special_closes_adhoc(self):
         lunar_new_years_eve = (chinese_lunar_new_year_dates - pd.Timedelta(days=1))[
-            np.in1d(
+            np.isin(
                 chinese_lunar_new_year_dates.weekday,
                 [TUESDAY, WEDNESDAY, THURSDAY, FRIDAY, SATURDAY],
             )
